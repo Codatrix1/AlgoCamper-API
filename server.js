@@ -6,8 +6,25 @@ dotenv.config({ path: "./config/config.env" });
 const express = require("express");
 const app = express();
 
-// Route files
+// Rest of the Packages
+const morgan = require("morgan");
+
+// Router imports
 const bootcampRouter = require("./routes/bootcampRoutes");
+
+// import middlewares
+// const loggerMiddleware = require("./middlewares/logger");
+
+//-------------------
+// MIDDLEWARE STACK
+//------------------
+// Custom Logger middleware
+// app.use(loggerMiddleware);
+
+// Dev logging middleware
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 //--------------------------
 // Our ROUTES w/ Routers
