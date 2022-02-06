@@ -1,11 +1,11 @@
-// Imports for router
+// express and router invoking
 const express = require("express");
 const router = express.Router();
 
 // import controller
 const bootcampController = require("../controllers/bootcampController");
 
-// Routes
+// setup Routes
 router
   .route("/")
   .get(bootcampController.getAllBootcamps)
@@ -17,5 +17,5 @@ router
   .put(bootcampController.updateBootcamp)
   .delete(bootcampController.deleteBootcamp);
 
-// Exporting router
+// Export router
 module.exports = router;

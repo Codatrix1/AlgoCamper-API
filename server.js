@@ -2,14 +2,19 @@
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
 
-// Express
+// import and connect to DB
+const connectDB = require("./config/connectDB");
+connectDB();
+
+// express setup
 const express = require("express");
 const app = express();
 
-// Rest of the Packages
+// Rest of the packages
 const morgan = require("morgan");
+const colors = require("colors");
 
-// Router imports
+// imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
 
 // import middlewares
@@ -25,18 +30,31 @@ const bootcampRouter = require("./routes/bootcampRoutes");
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+app.use(express.json()); // to access json data from req.body
 
 //--------------------------
-// Our ROUTES w/ Routers
+// Mounting the Routers
 //--------------------------
-
-// Middlewares: Mounting the Routers Properly ✔✔
 app.use("/api/v1/bootcamps", bootcampRouter);
 
-// Server
+//--------------------------
+// Setting up the Server
+//--------------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, (req, res) => {
+const server = app.listen(PORT, (req, res) => {
   console.log(
-    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}....`
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}....`.yellow
+      .bold
   );
+});
+
+//--------------------------------------
+// Handling Unhandled Promise Rejections
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION! 🔥 Shutting Down ");
+  console.log(`${err.name}, ${err.message}`.red.bold);
+  // Close server and exit process
+  server.close(() => {
+    process.exit(1);
+  });
 });
