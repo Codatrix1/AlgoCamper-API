@@ -30,7 +30,9 @@ const bootcampRouter = require("./routes/bootcampRoutes");
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-app.use(express.json()); // to access json data from req.body
+
+// Body Parser: to access json data from req.body
+app.use(express.json());
 
 //--------------------------
 // Mounting the Routers

@@ -54,11 +54,9 @@ const BootcampSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ["Point"],
-      required: true,
     },
     coordinates: {
       type: [Number],
-      required: true,
       // Index for Geospatial data: To Boost performance while reading data via Queries
       // From MongoDB Docs : Selects geometries within a bounding GeoJSON geometry
       // The 2dsphere and 2d indexes support $geoWithin.
