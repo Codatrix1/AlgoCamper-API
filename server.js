@@ -19,6 +19,7 @@ const bootcampRouter = require("./routes/bootcampRoutes");
 
 // import middlewares
 // const loggerMiddleware = require("./middlewares/logger");
+const errorHandlerMiddleware = require("./middlewares/errorHandlerMiddleware");
 
 //-------------------
 // MIDDLEWARE STACK
@@ -38,6 +39,9 @@ app.use(express.json());
 // Mounting the Routers
 //--------------------------
 app.use("/api/v1/bootcamps", bootcampRouter);
+
+// Invoking error handler middlewares
+app.use(errorHandlerMiddleware);
 
 //--------------------------
 // Setting up the Server
