@@ -1,6 +1,7 @@
 const Bootcamp = require("../models/bootcampModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
 const asyncHandler = require("../middlewares/asyncHandler");
+const geocoder = require("../utils/geocoder");
 
 // @desc     Get all bootcamps
 // @route    GET /api/v1/bootcamps
@@ -79,6 +80,32 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: {} });
 });
 
+// @desc     GeoSpatial Query: Get bootcamps within a radius
+// @route    GET /api/v1/bootcamps/radius/:zipcode/:distance
+// @access   Private
+const getBootcampsInRadius = asyncHandler(async (req, res, next) => {
+  const { zipcode, distance } = req.params;
+
+  // Get lat/lng from the geocoder
+  const loc = await geocoder.geocode(zipcode);
+  const lat = loc[0].latitude;
+  const lng = loc[0].longitude;
+
+  // Calculate radius using radians: MongoDB uses radians
+  // Divide distance by Radius of the Earth
+  // Earth Radius = 3963 mi / 6378 km
+  const radius = distance / 3963.2;
+
+  // MongoDB Docs: If you use longitude and latitude, specify longitude first.
+  const bootcamps = await Bootcamp.find({
+    location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res
+    .status(200)
+    .json({ success: true, count: bootcamps.length, data: bootcamps });
+});
+
 // Exports
 module.exports = {
   getAllBootcamps,
@@ -86,4 +113,5 @@ module.exports = {
   createBootcamp,
   updateBootcamp,
   deleteBootcamp,
+  getBootcampsInRadius,
 };

@@ -5,6 +5,11 @@ const router = express.Router();
 // import controller
 const bootcampController = require("../controllers/bootcampController");
 
+// Dedicated Route for GeoSpatal Query: Get Bootcamps within a radius
+router
+  .route("/radius/:zipcode/:distance")
+  .get(bootcampController.getBootcampsInRadius);
+
 // setup Routes
 router
   .route("/")
