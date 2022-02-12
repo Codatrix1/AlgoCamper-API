@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require("validator"); // package for custom validation intergated with mongoose Custom Validation Options
 const slugify = require("slugify");
-const geocoderAPI = require("../utils/geocoder");
 const geocoder = require("../utils/geocoder");
 
 // Schema for bootcamp details
-const bootcampSchema = new mongoose.Schema({
+const BootcampSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Please provide a name for the bootcamp"],
@@ -131,7 +130,7 @@ const bootcampSchema = new mongoose.Schema({
 //------------------------------------------
 //---------------------------------------
 // Creating slugs using names w/ slugify
-bootcampSchema.pre("save", function (next) {
+BootcampSchema.pre("save", function (next) {
   // Warning: "this" points to current document on NEW Document Creation: Will NOT WORK while updating a document
   this.slug = slugify(this.name, { lower: true });
   next();
@@ -139,7 +138,7 @@ bootcampSchema.pre("save", function (next) {
 
 //--------------------------------------------------
 // GeoCode & Create Location Field w/ node-geocoder
-bootcampSchema.pre("save", async function (next) {
+BootcampSchema.pre("save", async function (next) {
   const loc = await geocoder.geocode(this.address);
 
   this.location = {
@@ -160,5 +159,5 @@ bootcampSchema.pre("save", async function (next) {
 
 //----------------------------------------------
 // Creating a model and exporting it as default
-const Bootcamp = mongoose.model("Bootcamp", bootcampSchema);
+const Bootcamp = mongoose.model("Bootcamp", BootcampSchema);
 module.exports = Bootcamp;

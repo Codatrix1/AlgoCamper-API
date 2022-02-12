@@ -16,6 +16,7 @@ const colors = require("colors");
 
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
+const courseRouter = require("./routes/courseRoutes");
 
 // import middlewares
 // const loggerMiddleware = require("./middlewares/logger");
@@ -39,6 +40,7 @@ app.use(express.json());
 // Mounting the Routers
 //--------------------------
 app.use("/api/v1/bootcamps", bootcampRouter);
+app.use("/api/v1/courses", courseRouter);
 
 // Invoking error handler middlewares
 app.use(errorHandlerMiddleware);
