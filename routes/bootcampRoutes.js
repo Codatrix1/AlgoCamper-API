@@ -16,7 +16,7 @@ const bootcampController = require("../controllers/bootcampController");
 router.use("/:bootcampId/courses", courseRouter);
 
 //---------------------------------------------------------------------
-// Dedicated Route for GeoSpatal Query: Get Bootcamps within a radius
+// Dedicated Route for GeoSpatial Query: Get Bootcamps within a radius
 //---------------------------------------------------------------------
 router
   .route("/radius/:zipcode/:distance")

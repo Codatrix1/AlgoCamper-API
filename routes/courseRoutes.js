@@ -4,7 +4,12 @@ const router = express.Router({ mergeParams: true }); // Router w/ ❗ Nested Ro
 const courseController = require("../controllers/courseController");
 
 // Routes
-router.route("/").get(courseController.getAllCourses);
+router
+  .route("/")
+  .get(courseController.getAllCourses)
+  .post(courseController.addCourse);
+
+router.route("/:id").get(courseController.getSingleCourse);
 
 // Export router
 module.exports = router;
