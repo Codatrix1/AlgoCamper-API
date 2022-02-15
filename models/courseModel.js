@@ -47,6 +47,51 @@ const CourseSchema = new mongoose.Schema({
   },
 });
 
+//-------------------------------------------------------------------------------------------------------
+// Adding an Aggregation Pipeline || to Calculate Average Cost: Business Logic and Persist to Database
+// Statics are defined on the Model itself Vs Instance methods are defined on the current document being queried
+//-------------------------------------------------------------------------------------------------------
+// Static method to get the avearge of course tuitions
+CourseSchema.statics.getAverageCost = async function (bootcampId) {
+  console.log("Calculating average cost...".blue);
+
+  // define the various stages of aggregation pipeline: here "this" points to the Model
+  const stats = await this.aggregate([
+    {
+      $match: { bootcamp: bootcampId },
+    },
+    {
+      $group: {
+        _id: "$bootcamp",
+        averageCost: { $avg: "$tuition" },
+      },
+    },
+  ]);
+
+  // console.log(stats);
+
+  try {
+    await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+      averageCost: Math.ceil(stats[0].averageCost / 10) * 10,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Call the Above created static method after the getAverageCost has been saved to the Database
+CourseSchema.post("save", function () {
+  // "this" points to current course that have been saved: "post" middleware does not get access to next()
+  // "this.constructor" points to the Model itself
+  // bootcampId comes from here when we pass in the bootcamp document using the "this.bootcamp"
+  this.constructor.getAverageCost(this.bootcamp);
+});
+
+// Call getAverageCost before remove
+CourseSchema.pre("remove", function () {
+  this.constructor.getAverageCost(this.bootcamp);
+});
+
 //----------------------------------------------
 // Creating a model and exporting it as default
 const Course = mongoose.model("Course", CourseSchema);

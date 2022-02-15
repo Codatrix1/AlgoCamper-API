@@ -125,7 +125,7 @@ const deleteCourse = asyncHandler(async (req, res, next) => {
   }
 
   // Delete course: We will be using a middleware to perform this action
-  awaitcourse.remove();
+  await course.remove();
 
   // Response
   res.status(200).json({ success: true, data: {} });
