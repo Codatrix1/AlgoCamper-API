@@ -42,8 +42,10 @@ const getSingleCourse = asyncHandler(async (req, res, next) => {
   // Check for course
   if (!course) {
     return next(
-      ErrorResponseAPI(`No course found with the ID: ${req.params.id}`),
-      404
+      new ErrorResponseAPI(
+        `No course found with the ID of ${req.params.id}`,
+        404
+      )
     );
   }
 
@@ -56,7 +58,7 @@ const getSingleCourse = asyncHandler(async (req, res, next) => {
 // @route    POST /api/v1/bootcamps/:bootcampId/courses
 // @access   Private
 const addCourse = asyncHandler(async (req, res, next) => {
-  // re-assign the following
+  // Manually re-assign the following
   req.body.bootcamp = req.params.bootcampId;
 
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
@@ -64,10 +66,10 @@ const addCourse = asyncHandler(async (req, res, next) => {
   // Check for the bootcamp
   if (!bootcamp) {
     return next(
-      ErrorResponseAPI(
-        `No bootcamp found with the ID: ${req.params.bootcampId}`
-      ),
-      404
+      new ErrorResponseAPI(
+        `No bootcamp found with the ID of ${req.params.bootcampId}`,
+        404
+      )
     );
   }
 
@@ -78,6 +80,57 @@ const addCourse = asyncHandler(async (req, res, next) => {
   res.status(201).json({ success: true, data: course });
 });
 
+//-----------------------------------------------------------------------------------
+// @desc     Update a course
+// @route    PUT /api/v1/courses/:id
+// @access   Private
+const updateCourse = asyncHandler(async (req, res, next) => {
+  let course = await Course.findById(req.params.id);
+
+  // Check for the course
+  if (!course) {
+    return next(
+      new ErrorResponseAPI(
+        `No course found with the ID of ${req.params.id}`,
+        404
+      )
+    );
+  }
+
+  // Update course
+  course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  // Response
+  res.status(200).json({ success: true, data: course });
+});
+
+//-----------------------------------------------------------------------------------
+// @desc     Delete a course
+// @route    DELETE /api/v1/courses/:id
+// @access   Private
+const deleteCourse = asyncHandler(async (req, res, next) => {
+  const course = await Course.findById(req.params.id);
+
+  // Check for the course
+  if (!course) {
+    return next(
+      new ErrorResponseAPI(
+        `No course found with the ID of ${req.params.id}`,
+        404
+      )
+    );
+  }
+
+  // Delete course: We will be using a middleware to perform this action
+  awaitcourse.remove();
+
+  // Response
+  res.status(200).json({ success: true, data: {} });
+});
+
 //-----------
 // Exports
 //----------
@@ -85,4 +138,6 @@ module.exports = {
   getAllCourses,
   getSingleCourse,
   addCourse,
+  updateCourse,
+  deleteCourse,
 };

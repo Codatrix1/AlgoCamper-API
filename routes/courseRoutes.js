@@ -9,7 +9,11 @@ router
   .get(courseController.getAllCourses)
   .post(courseController.addCourse);
 
-router.route("/:id").get(courseController.getSingleCourse);
+router
+  .route("/:id")
+  .get(courseController.getSingleCourse)
+  .put(courseController.updateCourse)
+  .delete(courseController.deleteCourse);
 
 // Export router
 module.exports = router;

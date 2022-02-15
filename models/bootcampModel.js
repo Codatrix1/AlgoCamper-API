@@ -129,6 +129,7 @@ const BootcampSchema = new mongoose.Schema(
     },
   },
 
+  // Virtuals are document properties that you can get and set but that do not get persisted to MongoDB.
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -175,7 +176,7 @@ BootcampSchema.pre("remove", async function (next) {
   next();
 });
 
-// Reverse Populate with virtuals
+// REVERSE Populate with virtuals: Displaying all the courses as an Array in a each Bootcamp
 BootcampSchema.virtual("courses", {
   foreignField: "bootcamp",
   localField: "_id",

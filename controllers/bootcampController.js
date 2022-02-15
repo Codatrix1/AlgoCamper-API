@@ -149,7 +149,7 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
   if (!bootcamp) {
     return next(
       new ErrorResponseAPI(
-        `Bootcamp not found with the ID of ${req.params.id}`,
+        `No Bootcamp found with the ID of ${req.params.id}`,
         404
       )
     );
@@ -157,7 +157,7 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
 
   // in-order for cascade delete to work: we need to fire off the "pre remove" middleware from the Model
   // We need this code
-  bootcamp.remove();
+  await bootcamp.remove();
 
   res.status(200).json({ success: true, data: {} });
 });
