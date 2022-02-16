@@ -49,14 +49,14 @@ const CourseSchema = new mongoose.Schema({
 
 //-------------------------------------------------------------------------------------------------------
 // Adding an Aggregation Pipeline || to Calculate Average Cost: Business Logic and Persist to Database
-// Statics are defined on the Model itself Vs Instance methods are defined on the current document being queried
+// Statics are called on the Model itself Vs Instance methods are called on the current document being queried
 //-------------------------------------------------------------------------------------------------------
 // Static method to get the avearge of course tuitions
 CourseSchema.statics.getAverageCost = async function (bootcampId) {
-  console.log("Calculating average cost...".blue);
+  // console.log("Calculating average cost...".blue);
 
   // define the various stages of aggregation pipeline: here "this" points to the Model
-  const stats = await this.aggregate([
+  const statsObject = await this.aggregate([
     {
       $match: { bootcamp: bootcampId },
     },
@@ -68,14 +68,15 @@ CourseSchema.statics.getAverageCost = async function (bootcampId) {
     },
   ]);
 
-  // console.log(stats);
+  // console.log(statsObject);
 
+  // Save to the DB
   try {
     await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
-      averageCost: Math.ceil(stats[0].averageCost / 10) * 10,
+      averageCost: Math.ceil(statsObject[0].averageCost / 10) * 10,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 

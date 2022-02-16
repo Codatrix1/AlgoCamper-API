@@ -22,6 +22,11 @@ router
   .route("/radius/:zipcode/:distance")
   .get(bootcampController.getBootcampsInRadius);
 
+//---------------------------------------------------
+// Dedicated Route for Uploading Image for a Bootcamp
+//---------------------------------------------------
+router.route("/:id/image").put(bootcampController.uploadImage);
+
 //-------------------
 // Rest Of the Routes
 //-------------------

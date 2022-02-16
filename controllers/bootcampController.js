@@ -2,6 +2,7 @@ const Bootcamp = require("../models/bootcampModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
 const asyncHandler = require("../middlewares/asyncHandler");
 const geocoder = require("../utils/geocoder");
+const path = require("path");
 
 // @desc     Get all bootcamps
 // @route    GET /api/v1/bootcamps
@@ -188,7 +189,72 @@ const getBootcampsInRadius = asyncHandler(async (req, res, next) => {
     .json({ success: true, count: bootcamps.length, data: bootcamps });
 });
 
+// @desc     Upload Image for bootcamp
+// @route    PUT /api/v1/bootcamps/:id/image
+// @access   Private
+const uploadImage = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findById(req.params.id);
+
+  if (!bootcamp) {
+    return next(
+      new ErrorResponseAPI(
+        `No Bootcamp found with the ID of ${req.params.id}`,
+        404
+      )
+    );
+  }
+
+  // console.log(req.files);
+
+  // 1) Check for req.files: Coming from "express-fileUpload":
+  if (!req.files) {
+    return next(new ErrorResponseAPI(`No image uploaded`, 400));
+  }
+
+  // 2) get the image property from the object and assign to a variable to be used
+  const bootcampImage = req.files.image;
+
+  // 3) Check for mimetype
+  if (!bootcampImage.mimetype.startsWith("image")) {
+    return next(new ErrorResponseAPI(`Please upload an image file`, 400));
+  }
+
+  // 4) Check for allowed file size
+  if (bootcampImage.size > process.env.MAX_IMAGE_SIZE) {
+    return next(
+      new ErrorResponseAPI(`Please upload image smaller than 1MB`, 400)
+    );
+  }
+
+  // 5) Create Custom File Name
+  bootcampImage.name = `image_${bootcamp._id}${
+    path.parse(bootcampImage.name).ext
+  }`;
+
+  // 6) Save Image to local folder
+  const imagePath =
+    `${process.env.FILE_UPLOAD_PATH}/` + `${bootcampImage.name}`;
+
+  bootcampImage.mv(imagePath, async (err) => {
+    if (err) {
+      console.error(err);
+      return next(new ErrorResponseAPI(`Problem with file upload`, 500));
+    }
+
+    await Bootcamp.findByIdAndUpdate(req.params.id, {
+      photo: bootcampImage.name,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: bootcampImage.name,
+    });
+  });
+});
+
+//---------
 // Exports
+//---------
 module.exports = {
   getAllBootcamps,
   getBootcamp,
@@ -196,4 +262,5 @@ module.exports = {
   updateBootcamp,
   deleteBootcamp,
   getBootcampsInRadius,
+  uploadImage,
 };

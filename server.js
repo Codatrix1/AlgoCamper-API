@@ -1,3 +1,6 @@
+// import core modules
+const path = require("path");
+
 // Import and Load env Vars
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config/config.env" });
@@ -11,8 +14,10 @@ const express = require("express");
 const app = express();
 
 // Rest of the packages
+
 const morgan = require("morgan");
 const colors = require("colors");
+const fileUpload = require("express-fileupload");
 
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
@@ -33,8 +38,11 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Body Parser: to access json data from req.body
-app.use(express.json());
+app.use(express.json()); // Body Parser: to access json data from req.body
+app.use(fileUpload()); // invoke express-fileUpload
+
+// Set Static folder
+app.use(express.static(path.join(__dirname, "public")));
 
 //--------------------------
 // Mounting the Routers
