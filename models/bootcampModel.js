@@ -3,7 +3,9 @@ const validator = require("validator"); // package for custom validation interga
 const slugify = require("slugify");
 const geocoder = require("../utils/geocoder");
 
+//-------------------------------
 // Schema for bootcamp details
+//-------------------------------
 const BootcampSchema = new mongoose.Schema(
   {
     name: {

@@ -22,6 +22,7 @@ const fileUpload = require("express-fileupload");
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
 const courseRouter = require("./routes/courseRoutes");
+const authRouter = require("./routes/authRoutes");
 
 // import middlewares
 // const loggerMiddleware = require("./middlewares/logger");
@@ -49,6 +50,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //--------------------------
 app.use("/api/v1/bootcamps", bootcampRouter);
 app.use("/api/v1/courses", courseRouter);
+app.use("/api/v1/auth", authRouter);
 
 // Invoking error handler middlewares
 app.use(errorHandlerMiddleware);
