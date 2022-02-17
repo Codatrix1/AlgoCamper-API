@@ -10,6 +10,10 @@ const router = express.Router();
 // import controller
 const bootcampController = require("../controllers/bootcampController");
 
+// import factory function middleware and model
+const advancedResults = require("../middlewares/advancedResults");
+const Bootcamp = require("../models/bootcampModel");
+
 //-----------------------------------------------------------
 // ❗ NESTED Routing OR RE-ROUTE into other resource routers
 //----------------------------------------------------------
@@ -32,7 +36,7 @@ router.route("/:id/image").put(bootcampController.uploadImage);
 //-------------------
 router
   .route("/")
-  .get(bootcampController.getAllBootcamps)
+  .get(advancedResults(Bootcamp, "courses"), bootcampController.getAllBootcamps)
   .post(bootcampController.createBootcamp);
 
 router

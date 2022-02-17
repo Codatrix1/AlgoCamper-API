@@ -9,24 +9,20 @@ const asyncHandler = require("../middlewares/asyncHandler");
 // @route    GET /api/v1/bootcamps/:bootcampId/courses
 // @access   Public
 const getAllCourses = asyncHandler(async (req, res, next) => {
-  // initialize a query
-  let query;
-
-  // check for params and build the queries
+  // check for params
   if (req.params.bootcampId) {
-    query = Course.find({ bootcamp: req.params.bootcampId });
-  } else {
-    query = Course.find().populate({
-      path: "bootcamp",
-      select: "name description",
+    const courses = await Course.find({ bootcamp: req.params.bootcampId });
+
+    // Response For getting all the courses in a single bootcamp
+    return res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses,
     });
+  } else {
+    // For getiing filtered response coming from the advancedResults middleware
+    res.status(200).json(res.advancedResults);
   }
-
-  // Execute the query
-  const courses = await query;
-
-  // Response
-  res.status(200).json({ success: true, count: courses.length, data: courses });
 });
 
 //-----------------------------------------------------------------------------------
@@ -141,3 +137,32 @@ module.exports = {
   updateCourse,
   deleteCourse,
 };
+
+/*
+//----------------------------------------------------------------------
+// @desc     Get all courses
+// @route    GET /api/v1/courses
+// @route    GET /api/v1/bootcamps/:bootcampId/courses
+// @access   Public
+const getAllCourses = asyncHandler(async (req, res, next) => {
+  // initialize a query
+  let query;
+
+  // check for params and build the queries
+  if (req.params.bootcampId) {
+    query = Course.find({ bootcamp: req.params.bootcampId });
+  } else {
+    query = Course.find().populate({
+      path: "bootcamp",
+      select: "name description",
+    });
+  }
+
+  // Execute the query
+  const courses = await query;
+
+  // Response
+  res.status(200).json({ success: true, count: courses.length, data: courses });
+});
+
+*/

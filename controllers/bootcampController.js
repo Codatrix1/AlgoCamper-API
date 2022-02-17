@@ -8,86 +8,7 @@ const path = require("path");
 // @route    GET /api/v1/bootcamps
 // @access   Public
 const getAllBootcamps = asyncHandler(async (req, res, next) => {
-  // Advanced Filtering: Based on Fields
-  let query;
-
-  // making a copy of req.query using Spread
-  const reqQuery = { ...req.query };
-
-  // Fields to exclude
-  const removeFields = ["select", "sort", "page", "limit"];
-
-  // Loop over removeFields and delete them from reqQuery
-  removeFields.forEach((param) => delete reqQuery[param]);
-
-  // Create query string
-  let queryStr = JSON.stringify(reqQuery);
-
-  // Create operators ($gt, $gte, etc) for filtering
-  queryStr = queryStr.replace(
-    /\b(gt|gte|lt|lte|in)\b/g,
-    (match) => `$${match}`
-  );
-
-  // Finding resource
-  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
-
-  // Select Fields
-  if (req.query.select) {
-    const fields = req.query.select.split(",").join(" ");
-    query = query.select(fields);
-  }
-
-  // Sorting
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  } else {
-    // default sort
-    query = query.sort("-createdAt _id");
-  }
-
-  //------------------------------------- Pagination
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 25;
-  // const skip = (page - 1) * limit;
-
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-
-  const total = await Bootcamp.countDocuments();
-
-  query = query.skip(startIndex).limit(limit);
-
-  // Executing query
-  const bootcamps = await query;
-
-  //-- Pagination Result: PLEASE REVIEW THIS LOGIC LATER
-  const pagination = {};
-
-  // For getting the Next Page for Frontend
-  if (endIndex < total) {
-    pagination.next = {
-      page: page + 1,
-      limit,
-    };
-  }
-
-  // For getting the Previous Page for Frontend
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit,
-    };
-  }
-
-  // Send Response
-  res.status(200).json({
-    success: true,
-    count: bootcamps.length,
-    pagination: pagination,
-    data: bootcamps,
-  });
+  res.status(200).json(res.advancedResults);
 });
 
 // @desc     Get single bootcamp
@@ -264,3 +185,92 @@ module.exports = {
   getBootcampsInRadius,
   uploadImage,
 };
+
+/*
+// @desc     Get all bootcamps
+// @route    GET /api/v1/bootcamps
+// @access   Public
+const getAllBootcamps = asyncHandler(async (req, res, next) => {
+  // Advanced Filtering: Based on Fields
+  let query;
+
+  // making a copy of req.query using Spread
+  const reqQuery = { ...req.query };
+
+  // Fields to exclude
+  const removeFields = ["select", "sort", "page", "limit"];
+
+  // Loop over removeFields and delete them from reqQuery
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  // Create query string
+  let queryStr = JSON.stringify(reqQuery);
+
+  // Create operators ($gt, $gte, etc) for filtering
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+
+  // Finding resource
+  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
+
+  // Select Fields
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    query = query.select(fields);
+  }
+
+  // Sorting
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    query = query.sort(sortBy);
+  } else {
+    // default sort
+    query = query.sort("-createdAt _id");
+  }
+
+  //------------------------------------- Pagination
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 25;
+  // const skip = (page - 1) * limit;
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const total = await Bootcamp.countDocuments();
+
+  query = query.skip(startIndex).limit(limit);
+
+  // Executing query
+  const bootcamps = await query;
+
+  //-- Pagination Result: PLEASE REVIEW THIS LOGIC LATER
+  const pagination = {};
+
+  // For getting the Next Page for Frontend
+  if (endIndex < total) {
+    pagination.next = {
+      page: page + 1,
+      limit,
+    };
+  }
+
+  // For getting the Previous Page for Frontend
+  if (startIndex > 0) {
+    pagination.prev = {
+      page: page - 1,
+      limit,
+    };
+  }
+
+  // Send Response
+  res.status(200).json({
+    success: true,
+    count: bootcamps.length,
+    pagination: pagination,
+    data: bootcamps,
+  });
+});
+
+*/
