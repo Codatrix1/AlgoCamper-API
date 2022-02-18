@@ -7,6 +7,17 @@ const asyncHandler = require("../middlewares/asyncHandler");
 // @access   Public
 
 const register = asyncHandler(async (req, res, next) => {
+  // Destructure & Pull out the fields from req.body
+  const { name, email, password, role } = req.body;
+
+  // Create user
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role,
+  });
+
   res.status(200).json({ success: true });
 });
 
