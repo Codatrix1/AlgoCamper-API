@@ -48,10 +48,10 @@ const UserSchema = new mongoose.Schema({
 //------------------------------------------------
 // Encrypting and Hashing password using bcryptjs
 //------------------------------------------------
-UserSchema.pre("save", async function (next) {
+// IMP INFO: next() is NOT REQUIRED in latest Mongoose package Version 6: From the Docs
+UserSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 //--------------------
@@ -61,6 +61,14 @@ UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+};
+
+//--------------------------------------------------------------------------------------
+// Comparing hashed password in DB to entered password for Authentication w/ Instance Method
+//--------------------------------------------------------------------------------------
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  return isMatch;
 };
 
 //----------------------------------------------
