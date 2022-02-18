@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator"); // package for custom validation intergated with mongoose Custom Validation Options
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 //-------------------------------
 // Schema for bootcamp details
@@ -52,6 +53,15 @@ UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
+
+//--------------------
+// Sign JWT and return
+//--------------------
+UserSchema.methods.getSignedJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
 
 //----------------------------------------------
 // Creating a model and exporting it as default
