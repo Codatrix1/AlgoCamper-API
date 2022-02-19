@@ -18,6 +18,7 @@ const app = express();
 const morgan = require("morgan");
 const colors = require("colors");
 const fileUpload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
@@ -41,6 +42,9 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(express.json()); // Body Parser: to access json data from req.body
 app.use(fileUpload()); // invoke express-fileUpload
+
+// to access cookie data from req.cookies
+app.use(cookieParser());
 
 // Set Static folder
 app.use(express.static(path.join(__dirname, "public")));

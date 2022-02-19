@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
 const asyncHandler = require("../middlewares/asyncHandler");
+const { attachCookiesToResponse } = require("../utils/cookies");
 
 //-------------------------------------------------------------
 // @desc     Register user
@@ -20,9 +21,7 @@ const register = asyncHandler(async (req, res, next) => {
   });
 
   // Create user token: method called on the current document
-  const token = user.getSignedJwtToken();
-
-  res.status(200).json({ success: true, token });
+  attachCookiesToResponse(user, 200, res);
 });
 
 //----------------------------------------------------------------
@@ -53,10 +52,8 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponseAPI("Invalid credentials", 401));
   }
 
-  // If everything checks out correctly, Create user token and send in response
-  const token = user.getSignedJwtToken();
-
-  res.status(200).json({ success: true, token });
+  // If everything checks out correctly, Create user token and send in response via cookie
+  attachCookiesToResponse(user, 200, res);
 });
 
 //---------
