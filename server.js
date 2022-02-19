@@ -14,7 +14,6 @@ const express = require("express");
 const app = express();
 
 // Rest of the packages
-
 const morgan = require("morgan");
 const colors = require("colors");
 const fileUpload = require("express-fileupload");

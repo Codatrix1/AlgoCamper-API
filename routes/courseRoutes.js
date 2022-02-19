@@ -8,6 +8,9 @@ const courseController = require("../controllers/courseController");
 const advancedResults = require("../middlewares/advancedResults");
 const Course = require("../models/courseModel");
 
+// auth middleware
+const { protect } = require("../middlewares/authMiddleware");
+
 // Routes
 router
   .route("/")
@@ -18,13 +21,13 @@ router
     }),
     courseController.getAllCourses
   )
-  .post(courseController.addCourse);
+  .post(protect, courseController.addCourse);
 
 router
   .route("/:id")
   .get(courseController.getSingleCourse)
-  .put(courseController.updateCourse)
-  .delete(courseController.deleteCourse);
+  .put(protect, courseController.updateCourse)
+  .delete(protect, courseController.deleteCourse);
 
 // Export router
 module.exports = router;

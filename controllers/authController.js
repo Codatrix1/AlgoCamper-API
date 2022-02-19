@@ -1,7 +1,9 @@
 const User = require("../models/userModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
 const asyncHandler = require("../middlewares/asyncHandler");
-const { attachCookiesToResponse } = require("../utils/cookies");
+const {
+  createTokenAndAttachCookiesToResponse,
+} = require("../middlewares/authMiddleware");
 
 //-------------------------------------------------------------
 // @desc     Register user
@@ -20,8 +22,8 @@ const register = asyncHandler(async (req, res, next) => {
     role,
   });
 
-  // Create user token: method called on the current document
-  attachCookiesToResponse(user, 200, res);
+  // Create user token and send in response via cookie:
+  createTokenAndAttachCookiesToResponse(user, 200, res);
 });
 
 //----------------------------------------------------------------
@@ -46,17 +48,32 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponseAPI("Invalid credentials", 401));
   }
 
-  // If email found in DB, check the inputted "password" with compare method defined in the user model
+  // If email found in DB, check the entered "password" with compare method defined in the user model
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
     return next(new ErrorResponseAPI("Invalid credentials", 401));
   }
 
   // If everything checks out correctly, Create user token and send in response via cookie
-  attachCookiesToResponse(user, 200, res);
+  createTokenAndAttachCookiesToResponse(user, 200, res);
+});
+
+//-------------------------------------------------------------
+// @desc     Get current logged in user
+// @route    GET /api/v1/auth/me
+// @access   Private
+
+const showMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  // console.log(user);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
 });
 
 //---------
 // Exports
 //---------
-module.exports = { register, login };
+module.exports = { register, login, showMe };
