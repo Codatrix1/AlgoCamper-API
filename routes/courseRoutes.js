@@ -9,7 +9,10 @@ const advancedResults = require("../middlewares/advancedResults");
 const Course = require("../models/courseModel");
 
 // auth middleware
-const { protect } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  authorizePermissions,
+} = require("../middlewares/authMiddleware");
 
 // Routes
 router
@@ -21,13 +24,24 @@ router
     }),
     courseController.getAllCourses
   )
-  .post(protect, courseController.addCourse);
+  .post(
+    [protect, authorizePermissions("admin", "publisher")],
+    courseController.addCourse
+  );
 
 router
   .route("/:id")
   .get(courseController.getSingleCourse)
-  .put(protect, courseController.updateCourse)
-  .delete(protect, courseController.deleteCourse);
+  .put(
+    [protect, authorizePermissions("admin", "publisher")],
+    courseController.updateCourse
+  )
+  .delete(
+    [protect, authorizePermissions("admin", "publisher")],
+    courseController.deleteCourse
+  );
 
+//---------------
 // Export router
+//-----------------
 module.exports = router;

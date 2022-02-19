@@ -38,7 +38,7 @@ const createTokenAndAttachCookiesToResponse = (user, statusCode, res) => {
 };
 
 //---------------------------------------------
-// Script 2) Protect Routes w/ verified token
+// Level 1 Security: Authenticate User: Protect Routes w/ verified token
 //---------------------------------------------
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -74,7 +74,30 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
+//--------------------------------------------------------------------------------------------
+// Level 2 Security : Authenticate user as an admin, publisher or whatever args passed in the userRoutes
+//--------------------------------------------------------------------------------------------
+// Grant Access to specific Roles
+const authorizePermissions = (...roles) => {
+  // console.log(roles); // Passed as args in the userRoutes
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorResponseAPI(
+          `ACCESS DENIED: User role | ${req.user.role} | is unauthorized to perform this action `,
+          403
+        )
+      );
+    }
+    next();
+  };
+};
+
 //-----------
 // Export
 //-----------
-module.exports = { createTokenAndAttachCookiesToResponse, protect };
+module.exports = {
+  createTokenAndAttachCookiesToResponse,
+  protect,
+  authorizePermissions,
+};

@@ -15,7 +15,10 @@ const advancedResults = require("../middlewares/advancedResults");
 const Bootcamp = require("../models/bootcampModel");
 
 // auth middleware
-const { protect } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  authorizePermissions,
+} = require("../middlewares/authMiddleware");
 
 //-----------------------------------------------------------
 // ❗ NESTED Routing OR RE-ROUTE into other resource routers
@@ -32,7 +35,12 @@ router
 //---------------------------------------------------
 // Dedicated Route for Uploading Image for a Bootcamp
 //---------------------------------------------------
-router.route("/:id/image").put(protect, bootcampController.uploadImage);
+router
+  .route("/:id/image")
+  .put(
+    [protect, authorizePermissions("admin", "publisher")],
+    bootcampController.uploadImage
+  );
 
 //-------------------
 // Rest Of the Routes
@@ -40,13 +48,22 @@ router.route("/:id/image").put(protect, bootcampController.uploadImage);
 router
   .route("/")
   .get(advancedResults(Bootcamp, "courses"), bootcampController.getAllBootcamps)
-  .post(protect, bootcampController.createBootcamp);
+  .post(
+    [protect, authorizePermissions("admin", "publisher")],
+    bootcampController.createBootcamp
+  );
 
 router
   .route("/:id")
   .get(bootcampController.getBootcamp)
-  .put(protect, bootcampController.updateBootcamp)
-  .delete(protect, bootcampController.deleteBootcamp);
+  .put(
+    [protect, authorizePermissions("admin", "publisher")],
+    bootcampController.updateBootcamp
+  )
+  .delete(
+    [protect, authorizePermissions("admin", "publisher")],
+    bootcampController.deleteBootcamp
+  );
 
 // Export router
 module.exports = router;
