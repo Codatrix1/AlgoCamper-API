@@ -54,8 +54,11 @@ const getSingleCourse = asyncHandler(async (req, res, next) => {
 // @route    POST /api/v1/bootcamps/:bootcampId/courses
 // @access   Private
 const addCourse = asyncHandler(async (req, res, next) => {
-  // Manually re-assign the following
+  // Manually assign the following
+  // Add bootcamp to req.body: to add the bootcamp with "id" as the value: for the course to have the bootcamp to which it is associated with
   req.body.bootcamp = req.params.bootcampId;
+  // Add user to req.body: to add "user" field who created the course with His/Her "id" as the value
+  req.body.user = req.user.id;
 
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
@@ -65,6 +68,21 @@ const addCourse = asyncHandler(async (req, res, next) => {
       new ErrorResponseAPI(
         `No bootcamp found with the ID of ${req.params.bootcampId}`,
         404
+      )
+    );
+  }
+
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can add a course to the bootcamp
+  // No other publisher(user) can add a course to the bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can add whatever He/She wants to add: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can add a course to the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to add a course to the bootcamp with the ID ${bootcamp._id}`,
+        401
       )
     );
   }
@@ -93,6 +111,21 @@ const updateCourse = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can update a course to the bootcamp
+  // No other publisher(user) can update a course to the bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can update whatever He/She wants to add: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can update a course to the bootcamp
+  if (course.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to update a course to the bootcamp with the ID ${course._id}`,
+        401
+      )
+    );
+  }
+
   // Update course
   course = await Course.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -116,6 +149,21 @@ const deleteCourse = asyncHandler(async (req, res, next) => {
       new ErrorResponseAPI(
         `No course found with the ID of ${req.params.id}`,
         404
+      )
+    );
+  }
+
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can delete a course to the bootcamp
+  // No other publisher(user) can delete a course to the bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can delete whatever He/She wants to add: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can delete a course to the bootcamp
+  if (course.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to delete a course to the bootcamp with the ID ${course._id}`,
+        401
       )
     );
   }

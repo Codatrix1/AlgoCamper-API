@@ -45,6 +45,14 @@ const CourseSchema = new mongoose.Schema({
     ref: "Bootcamp",
     required: true,
   },
+
+  // Parent Referencing: NOT written as an Array like Child Ref, but as an Object itself like other fields in Schema
+  // User Model is the Parent here: Course Model is the Child
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
 //-------------------------------------------------------------------------------------------------------
