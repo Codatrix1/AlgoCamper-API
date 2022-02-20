@@ -64,10 +64,8 @@ const createBootcamp = asyncHandler(async (req, res, next) => {
 // @route    PUT /api/v1/bootcamps/:id
 // @access   Private
 const updateBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  // search for the bootcamp
+  let bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp) {
     return next(
@@ -78,6 +76,28 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can update the bootcamp
+  // No other publisher(user) can edit a bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can update whatever He/She wants to update: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can update the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to update this bootcamp`,
+        401
+      )
+    );
+  }
+
+  // If all checks out, go ahead and update
+  bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  // Response
   res.status(200).json({ success: true, data: bootcamp });
 });
 
@@ -96,6 +116,21 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
       new ErrorResponseAPI(
         `No Bootcamp found with the ID of ${req.params.id}`,
         404
+      )
+    );
+  }
+
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can delete the bootcamp
+  // No other publisher(user) can delete a bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can delete whatever He/She wants to delete: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can delete the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to delete this bootcamp`,
+        401
       )
     );
   }
@@ -146,6 +181,21 @@ const uploadImage = asyncHandler(async (req, res, next) => {
       new ErrorResponseAPI(
         `No Bootcamp found with the ID of ${req.params.id}`,
         404
+      )
+    );
+  }
+
+  // Check Permissions
+
+  // Business Logic 1: Make sure that the Only the publisher(user) who is the owner of the bootcamp can upoad an image for the bootcamp
+  // No other publisher(user) can upload an image of the bootcamp that does not belong to Him/Her
+  // Business Logic 2: Also: "admin" can upload whatever He/She wants to upload: Admin has all the Rights
+  // If the "user/publisher" is the owner and also NOT AN ADMIN, he can upload the image for the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `User with the ID ${req.user.id} is not authorized to upload the image OR update this bootcamp`,
+        401
       )
     );
   }
