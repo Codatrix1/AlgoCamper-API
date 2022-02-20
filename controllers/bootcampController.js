@@ -4,6 +4,7 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const geocoder = require("../utils/geocoder");
 const path = require("path");
 
+//---------------------------------------------------------------
 // @desc     Get all bootcamps
 // @route    GET /api/v1/bootcamps
 // @access   Public
@@ -11,6 +12,7 @@ const getAllBootcamps = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
 
+//-----------------------------------------------------------------
 // @desc     Get single bootcamp
 // @route    GET /api/v1/bootcamps/:id
 // @access   Public
@@ -29,15 +31,35 @@ const getBootcamp = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: bootcamp });
 });
 
+//-------------------------------------------------------------
 // @desc     Create new bootcamp
 // @route    POST /api/v1/bootcamps
 // @access   Private
 const createBootcamp = asyncHandler(async (req, res, next) => {
+  // Add user to req.body: to add "user" field who created the bootcamp with His/Her "id" as the value
+  req.body.user = req.user.id;
+
+  // Check for published bootcamp: by user id on a single bootcamp
+  // Business Logic 1: Making sure that "One publisher can create only one bootcamp"
+  const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
+
+  // Business Logic 2: If the user is not an admin, they can only add one bootcamp
+  // admin can add as many bootcamps as He/She wants
+  if (publishedBootcamp && req.user.role !== "admin") {
+    return next(
+      new ErrorResponseAPI(
+        `The user with the role | publisher | with ID ${req.user.id} has already published a bootcamp`,
+        400
+      )
+    );
+  }
+
   const bootcamp = await Bootcamp.create(req.body);
 
   res.status(201).json({ success: true, data: bootcamp });
 });
 
+//--------------------------------------------------------------
 // @desc     Update bootcamp
 // @route    PUT /api/v1/bootcamps/:id
 // @access   Private
@@ -59,6 +81,7 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: bootcamp });
 });
 
+//---------------------------------------------------------------
 // @desc     Delete bootcamp
 // @route    DELETE /api/v1/bootcamps/:id
 // @access   Private
@@ -84,6 +107,7 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: {} });
 });
 
+//----------------------------------------------------------------------
 // @desc     GeoSpatial Query: Get bootcamps within a radius
 // @route    GET /api/v1/bootcamps/radius/:zipcode/:distance
 // @access   Private
@@ -110,6 +134,7 @@ const getBootcampsInRadius = asyncHandler(async (req, res, next) => {
     .json({ success: true, count: bootcamps.length, data: bootcamps });
 });
 
+//-------------------------------------------------------------------
 // @desc     Upload Image for bootcamp
 // @route    PUT /api/v1/bootcamps/:id/image
 // @access   Private

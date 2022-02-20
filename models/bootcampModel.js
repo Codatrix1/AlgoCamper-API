@@ -129,6 +129,14 @@ const BootcampSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    // Parent Referencing: NOT written as an Array like Child Ref, but as an Object itself like other fields in Schema
+    // User Model is the Parent here: Bootcamp Model is the Child
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
 
   // Virtuals are document properties that you can get and set but that do not get persisted to MongoDB.
