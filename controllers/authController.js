@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
+const sendEmail = require("../utils/sendEmail");
 const asyncHandler = require("../middlewares/asyncHandler");
 const {
   createTokenAndAttachCookiesToResponse,
@@ -93,10 +94,39 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   // Save to DB
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
+  // Send it to User's Email
+  const resetURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/auth/resetPassword/${resetToken}`;
+
+  const message = `Forgot Your Password? Submit a PUT request with your new password to: ${resetURL}.\nIf you didn't forget your password, Please Ignore this Email!`;
+
+  try {
+    await sendEmail({
+      // email: req.body.email,
+      email: user.email,
+      subject: "Your password reset token (Valid for 10 mins)",
+      message: message,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: "Token sent to email",
+    });
+  } catch (error) {
+    console.log(error);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new ErrorResponseAPI(
+        "Oops! There was an error sending the email. Please try again later.",
+        500
+      )
+    );
+  }
 });
 
 //---------
