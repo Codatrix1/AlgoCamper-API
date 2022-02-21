@@ -135,7 +135,7 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // in-order for cascade delete to work: we need to fire off the "pre remove" middleware from the Model
+  // in-order for cascade delete to work: we need to fire off the "pre remove" middleware from the Model : to delete all the courses associated with that particular bootcamp
   // We need this code
   await bootcamp.remove();
 
