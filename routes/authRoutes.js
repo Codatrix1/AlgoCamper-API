@@ -12,7 +12,8 @@ const { protect } = require("../middlewares/authMiddleware");
 router.route("/register").post(authController.register);
 router.route("/login").post(authController.login);
 router.route("/me").get(protect, authController.showMe);
-router.route("/forgotpassword").post(authController.forgotPassword);
+router.route("/forgotPassword").post(authController.forgotPassword);
+router.route("/resetPassword/:token").put(authController.resetPassword);
 
 //---------------
 // Export router

@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const ErrorResponseAPI = require("../utils/errorResponseAPI");
 const sendEmail = require("../utils/sendEmail");
+const crypto = require("crypto");
 const asyncHandler = require("../middlewares/asyncHandler");
 const {
   createTokenAndAttachCookiesToResponse,
@@ -129,7 +130,43 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
+//-------------------------------------------------------------
+// @desc     Reset password
+// @route    PUT /api/v1/auth/resetpassword/:token
+// @access   Public
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on the token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  // 2) If token has not expired, and there is user, set the new password
+  if (!user) {
+    return next(
+      new ErrorResponseAPI("Bad Request! Token is invalid or has expired", 400)
+    );
+  }
+
+  // 3) Set new password for the user
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  // 4) Save to DB: [After running through the "pre save" middleware, which encrypts the password before saving to DB ]
+  await user.save();
+
+  // If everything checks out correctly, Create user token and send in response via cookie
+  createTokenAndAttachCookiesToResponse(user, 200, res);
+});
+
 //---------
 // Exports
 //---------
-module.exports = { register, login, showMe, forgotPassword };
+module.exports = { register, login, showMe, forgotPassword, resetPassword };

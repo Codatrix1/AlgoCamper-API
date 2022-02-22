@@ -51,6 +51,7 @@ const UserSchema = new mongoose.Schema({
 //------------------------------------------------
 // IMP INFO: next() is NOT REQUIRED in latest Mongoose package Version 6: From the Docs
 UserSchema.pre("save", async function (next) {
+  // conditional execution: if password is NOT MODIFIED - DO NOT RUN ENCRYPTION and run next() immediately and skip rest of the code
   if (!this.isModified("password")) {
     next();
   }
@@ -84,6 +85,8 @@ UserSchema.methods.getResetPasswordToken = function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString("hex");
 
+  // console.log(resetToken);
+
   // Hash token and set to resetPasswordToken Field
   this.resetPasswordToken = crypto
     .createHash("sha256")
@@ -96,6 +99,7 @@ UserSchema.methods.getResetPasswordToken = function () {
   // return the original token: not the hashed version
   return resetToken;
 };
+
 //----------------------------------------------
 // Creating a model and exporting it as default
 //----------------------------------------------
