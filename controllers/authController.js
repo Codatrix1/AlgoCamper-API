@@ -166,7 +166,77 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   createTokenAndAttachCookiesToResponse(user, 200, res);
 });
 
+//-------------------------------------------------------------
+// @desc     Update name and email for the current logged in user
+// @route    PUT /api/v1/auth/updateDetails
+// @access   Private
+
+const updateDetails = asyncHandler(async (req, res, next) => {
+  // Check for Only name and email: Since we want to update these two fields
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  if (!req.body.name || !req.body.email) {
+    return next(new ErrorResponseAPI("Please provide name and email", 400));
+  }
+
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+//-------------------------------------------------------------
+// @desc     Update user password
+// @route    PUT /api/v1/auth/updatePassword
+// @access   Private
+
+const updateUserPassword = asyncHandler(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+
+  // check for oldPassword, newPassword in the body
+  if (!oldPassword || !newPassword) {
+    return next(
+      new ErrorResponseAPI(
+        "Please provide the old password and a new password",
+        400
+      )
+    );
+  }
+
+  const user = await User.findById(req.user.id).select("+password");
+
+  // Find the _id of the user in the DB, and check the inputted "oldPassword" with compare [Instance] method defined in the user model
+  const isPasswordCorrect = await user.comparePassword(oldPassword);
+  if (!isPasswordCorrect) {
+    return next(new ErrorResponseAPI("Invalid Credentials", 401));
+  }
+  // console.log(user);
+
+  // If All Checks out correctly, re-assign the password and update the new password in the DB using the save() : Instance Method on the current doc
+  user.password = newPassword;
+  await user.save();
+
+  // If everything checks out correctly, Create user token and send in response via cookie
+  createTokenAndAttachCookiesToResponse(user, 200, res);
+});
+
 //---------
 // Exports
 //---------
-module.exports = { register, login, showMe, forgotPassword, resetPassword };
+module.exports = {
+  register,
+  login,
+  showMe,
+  forgotPassword,
+  resetPassword,
+  updateDetails,
+  updateUserPassword,
+};
