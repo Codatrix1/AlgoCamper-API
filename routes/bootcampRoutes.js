@@ -3,6 +3,7 @@ const express = require("express");
 
 // Include other resource routers: to achieve ❗ NESTED Routing/RE-ROUTING
 const courseRouter = require("./courseRoutes");
+const reviewRouter = require("./reviewRoutes");
 
 // Invoke the main router
 const router = express.Router();
@@ -24,6 +25,7 @@ const {
 // ❗ NESTED Routing OR RE-ROUTE into other resource routers
 //----------------------------------------------------------
 router.use("/:bootcampId/courses", courseRouter);
+router.use("/:bootcampId/reviews", reviewRouter);
 
 //---------------------------------------------------------------------
 // Dedicated Route for GeoSpatial Query: Get Bootcamps within a radius
