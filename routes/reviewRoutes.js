@@ -15,17 +15,19 @@ const {
 } = require("../middlewares/authMiddleware");
 
 // Routes
-router.route("/").get(
-  advancedResults(Review, {
-    path: "bootcamp",
-    select: "name description",
-  }),
-  reviewController.getAllReviews
-);
-//   .post(
-//     [protect, authorizePermissions("admin", "publisher")],
-//     courseController.addCourse
-//   );
+router
+  .route("/")
+  .get(
+    advancedResults(Review, {
+      path: "bootcamp",
+      select: "name description",
+    }),
+    reviewController.getAllReviews
+  )
+  .post(
+    [protect, authorizePermissions("admin", "user")],
+    reviewController.createReview
+  );
 
 router.route("/:id").get(reviewController.getSingleReview);
 //   .put(

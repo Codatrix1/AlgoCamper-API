@@ -45,6 +45,11 @@ const ReviewSchema = new mongoose.Schema({
   },
 });
 
+//--------------------------------------------------------------------------------------------
+// Compound Indexing: Making sure that a single "user" can add "only one review per bootcamp"
+//--------------------------------------------------------------------------------------------
+ReviewSchema.index({ bootcamp: 1, user: 1 }, { unique: true });
+
 //----------------------------------------------
 // Creating a model and exporting it as default
 const Review = mongoose.model("Review", ReviewSchema);
