@@ -27,9 +27,7 @@ router.route("/").get(
 //     courseController.addCourse
 //   );
 
-// router
-//   .route("/:id")
-//   .get(courseController.getSingleCourse)
+router.route("/:id").get(reviewController.getSingleReview);
 //   .put(
 //     [protect, authorizePermissions("admin", "publisher")],
 //     courseController.updateCourse
