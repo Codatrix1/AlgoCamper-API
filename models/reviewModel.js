@@ -50,7 +50,54 @@ const ReviewSchema = new mongoose.Schema({
 //--------------------------------------------------------------------------------------------
 ReviewSchema.index({ bootcamp: 1, user: 1 }, { unique: true });
 
+//-------------------------------------------------------------------------------------------------------
+// Adding an Aggregation Pipeline || to Calculate Average Rating: Business Logic and Persist to Database
+// Statics are called on the Model itself Vs Instance methods are called on the current document being queried
+//-------------------------------------------------------------------------------------------------------
+// Static method to get the average of rating
+ReviewSchema.statics.getAverageRating = async function (bootcampId) {
+  // console.log("Calculating average rating...".blue);
+
+  // define the various stages of aggregation pipeline: here "this" points to the Model
+  const statsObject = await this.aggregate([
+    {
+      $match: { bootcamp: bootcampId },
+    },
+    {
+      $group: {
+        _id: "$bootcamp",
+        averageRating: { $avg: "$rating" },
+      },
+    },
+  ]);
+
+  // console.log(statsObject);
+
+  // Save to the DB
+  try {
+    await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+      averageRating: statsObject[0].averageRating,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Call the Above created static method after the getAverageRating has been saved to the Database
+ReviewSchema.post("save", function () {
+  // "this" points to current course that have been saved: "post" middleware does not get access to next()
+  // "this.constructor" points to the Model itself
+  // bootcampId comes from here when we pass in the bootcamp document using the "this.bootcamp"
+  this.constructor.getAverageRating(this.bootcamp);
+});
+
+// Call getAverageRating before remove
+ReviewSchema.pre("remove", function () {
+  this.constructor.getAverageRating(this.bootcamp);
+});
+
 //----------------------------------------------
 // Creating a model and exporting it as default
+//----------------------------------------------
 const Review = mongoose.model("Review", ReviewSchema);
 module.exports = Review;
