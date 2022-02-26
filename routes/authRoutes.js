@@ -15,6 +15,7 @@ router.route("/me").get(protect, authController.showMe);
 router.route("/updateDetails").put(protect, authController.updateDetails);
 router.route("/updatePassword").put(protect, authController.updateUserPassword);
 router.route("/forgotPassword").post(authController.forgotPassword);
+router.route("/logout").get(protect, authController.logoutUserAndClearCookie);
 
 // Important: Mind the order of placements here
 router.route("/resetPassword/:token").put(authController.resetPassword);

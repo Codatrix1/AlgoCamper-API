@@ -37,9 +37,9 @@ const createTokenAndAttachCookiesToResponse = (user, statusCode, res) => {
   });
 };
 
-//---------------------------------------------
+//-----------------------------------------------------------------------
 // Level 1 Security: Authenticate User: Protect Routes w/ verified token
-//---------------------------------------------
+//-----------------------------------------------------------------------
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
@@ -47,12 +47,16 @@ const protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
+    // Set token from bearer token in headers
     token = req.headers.authorization.split(" ")[1];
   }
-
-  //   else if(req.cookies.token){
-  //       token = req.cookies.token
-  //   }
+  // // Set token from Cookie
+  // else if (req.cookies.token) {
+  //   // else part to send the authorization header via cookie:
+  //   // Make sure to remove the copy/pasted Auth Headers from POSTMAN
+  //   // otherwise the "id" would be returned as "null" when you try to authorize user via Cookie token
+  //   token = req.cookies.token;
+  // }
 
   // Check for token
   if (!token) {

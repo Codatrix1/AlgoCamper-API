@@ -61,12 +61,34 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 //-------------------------------------------------------------
+// @desc     Logout user/ Clear Cookie
+// @route    GET /api/v1/auth/logout
+// @access   Private
+
+const logoutUserAndClearCookie = asyncHandler(async (req, res, next) => {
+  // to logout user: Remove the cookie from the request
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+    // expires: new Date(Date.now() + 5 * 60 * 1000),
+  });
+
+  // while in production
+  // res.send();
+
+  // json response for DEV Purposes Only
+  res.status(200).json({ success: true, data: {} });
+});
+
+//-------------------------------------------------------------
 // @desc     Get current logged in user
 // @route    GET /api/v1/auth/me
 // @access   Private
 
 const showMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
+
+  // const user = req.user;
   // console.log(user);
 
   res.status(200).json({
@@ -239,4 +261,5 @@ module.exports = {
   resetPassword,
   updateDetails,
   updateUserPassword,
+  logoutUserAndClearCookie,
 };
