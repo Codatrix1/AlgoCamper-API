@@ -29,15 +29,17 @@ router
     reviewController.createReview
   );
 
-router.route("/:id").get(reviewController.getSingleReview);
-//   .put(
-//     [protect, authorizePermissions("admin", "publisher")],
-//     courseController.updateCourse
-//   )
-//   .delete(
-//     [protect, authorizePermissions("admin", "publisher")],
-//     courseController.deleteCourse
-//   );
+router
+  .route("/:id")
+  .get(reviewController.getSingleReview)
+  .put(
+    [protect, authorizePermissions("admin", "user")],
+    reviewController.updateReview
+  )
+  .delete(
+    [protect, authorizePermissions("admin", "user")],
+    reviewController.deleteReview
+  );
 
 //---------------
 // Export router
