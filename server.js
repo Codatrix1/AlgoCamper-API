@@ -18,6 +18,7 @@ const morgan = require("morgan");
 const colors = require("colors");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
+const mongoSanitize = require("express-mongo-sanitize");
 
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
@@ -43,6 +44,10 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(express.json()); // Body Parser: to access json data from req.body
 app.use(fileUpload()); // invoke express-fileUpload
+
+// Data Sanitization: Cleaning all the data that is coming from some Malacious code
+// a) against NoSQL query Injections: MongoDB Operators that return "true" in all queries
+app.use(mongoSanitize());
 
 // to access cookie data from req.cookies
 app.use(cookieParser());
