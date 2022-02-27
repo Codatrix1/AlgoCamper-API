@@ -21,6 +21,9 @@ const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 
 // imports routers
 const bootcampRouter = require("./routes/bootcampRoutes");
@@ -42,19 +45,40 @@ const errorHandlerMiddleware = require("./middlewares/errorHandlerMiddleware");
 // Set Security HTTP Headers
 app.use(helmet());
 
+// Enable CORS: Permission granted
+app.use(cors());
+
+// Trust proxy to use in other applications
+app.set("trust proxy", 1);
+
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(express.json()); // Body Parser: to access json data from req.body
-app.use(fileUpload()); // invoke express-fileUpload
+// Limit requests from the same IP Address:
+// a) against DDoS and Brute Force Attacks
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 15 * 60 * 1000, // 10 mins
+  message: "Too many requests from this IP, please try again after 15 minutes!",
+});
+app.use(limiter);
+
+// Body parser: limiting data reading from body into req.body
+app.use(express.json({ limit: "10kb" }));
+
+// invoke express-fileUpload
+app.use(fileUpload());
 
 // Data Sanitization: Cleaning all the data that is coming from some Malacious code
 // a) against NoSQL query Injections: MongoDB Operators that return "true" in all queries
 app.use(mongoSanitize());
 // b) against XSS: Cross-Site Scripting Attacks: Injecting Malacious HTML + JavaScript Code
 app.use(xss());
+
+// Prevent HTTP Parameter Pollution: Must be used at the end as it clears up the query string
+app.use(hpp());
 
 // to access cookie data from req.cookies
 app.use(cookieParser());
